@@ -9,3 +9,13 @@ For backdoor removal and safety improvement task, please run below script in eac
 Benchmark is available at [benchmark](https://figshare.com/account/verify_email/NDYxMTI2.siv_0YsfsPVXtK5ZTcvgtpTpZ6c).
 
 We are migrating this implementation to Socrates and this is a temparary repo for now.
+
+Experiments:
+- NN4: root causal_analysis.py
+- NN5: mnist folder
+- NN6: fashion folder
+- NN7: acas_N29 folder
+- NN8: acas_N33 folder
+- NN9: acas_N19 folder
+- mnist_nnrepair: mnist model to compare with nnrepair
+- cifar_nnrepair: cifar model to compare with nnrepair
