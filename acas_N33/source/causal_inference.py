@@ -55,7 +55,7 @@ class causal_analyzer:
     SPLIT_LAYER = 6
     REP_N = 5
 
-    def __init__(self, model, dd_generator, cex_generator, input_shape,
+    def __init__(self, model, dd_generator, cex_generator, dd_gen_test, cex_gen_test, input_shape,
                  mini_batch, batch_size=BATCH_SIZE, verbose=VERBOSE,
                  rep_n=REP_N):
 
@@ -64,6 +64,8 @@ class causal_analyzer:
         self.input_shape = input_shape
         self.dd_gen = dd_generator
         self.cex_gen = cex_generator
+        self.dd_gen_test = dd_gen_test
+        self.cex_gen_test = cex_gen_test
         self.steps = 1  #steps
         self.mini_batch = mini_batch
         self.batch_size = batch_size
@@ -506,8 +508,8 @@ class causal_analyzer:
 
             # per particle
             for idx in range(self.mini_batch):
-                X_batch = np.squeeze(np.squeeze(self.dd_gen.next(), axis=2), axis=2)
-                X_batch_perturbed = np.squeeze(np.squeeze(self.cex_gen.next(), axis=2), axis=2)
+                X_batch = np.squeeze(np.squeeze(self.dd_gen_test.next(), axis=2), axis=2)
+                X_batch_perturbed = np.squeeze(np.squeeze(self.cex_gen_test.next(), axis=2), axis=2)
 
                 o_prediction = self.model1.predict(X_batch)
                 p_prediction = self.model1.predict(X_batch_perturbed)
@@ -542,8 +544,8 @@ class causal_analyzer:
         else:
             # per particle
             for idx in range(self.mini_batch):
-                X_batch = np.squeeze(np.squeeze(self.dd_gen.next(), axis=2), axis=2)
-                X_batch_perturbed = np.squeeze(np.squeeze(self.cex_gen.next(), axis=2), axis=2)
+                X_batch = np.squeeze(np.squeeze(self.dd_gen_test.next(), axis=2), axis=2)
+                X_batch_perturbed = np.squeeze(np.squeeze(self.cex_gen_test.next(), axis=2), axis=2)
 
                 o_prediction = np.argmin(self.model.predict(X_batch), axis=1)
                 p_prediction = np.argmin(self.model.predict(X_batch_perturbed), axis=1)

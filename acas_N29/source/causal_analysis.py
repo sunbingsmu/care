@@ -115,6 +115,19 @@ def load_dataset(data_path):
     return dd, cex
 
 
+def load_dataset_test(data_path):
+
+    with h5py.File(data_path + '/drawndown_test.h5', 'r') as hf:
+        dd = hf['drawndown_test'][:]
+
+    with h5py.File(data_path + '/counterexample_test.h5', 'r') as hf:
+        cex = hf['counterexample_test'][:]
+
+    print('Dawndown shape %s' % str(dd.shape))
+    print('Counterexample shape %s' % str(cex.shape))
+
+    return dd, cex
+
 
 def build_data_loader(X):
     X = X.reshape(GEN_INPUT_SHAPE)
@@ -154,6 +167,10 @@ def start_analysis():
     dd_generator = build_data_loader(dd)
     cex_generator = build_data_loader(cex)
 
+    dd_t, cex_t = load_dataset_test(DATA_DIR)
+    dd_gen_test = build_data_loader(dd_t)
+    cex_gen_test = build_data_loader(cex_t)
+
     print('loading model')
     model_file = '%s/%s' % (MODEL_DIR, MODEL_FILENAME)
     model = load_model(model_file)
@@ -162,6 +179,7 @@ def start_analysis():
     analyzer = causal_analyzer(
         model,
         dd_generator, cex_generator,
+        dd_gen_test, cex_gen_test,
         input_shape=INPUT_SHAPE,
         mini_batch=MINI_BATCH,
         batch_size=BATCH_SIZE, verbose=2)
@@ -175,7 +193,7 @@ def main():
 
     os.environ["CUDA_VISIBLE_DEVICES"] = DEVICE
     utils_backdoor.fix_gpu_memory()
-    for i in range (0, 3):
+    for i in range (0, 5):
         print(i)
         start_analysis()
 
