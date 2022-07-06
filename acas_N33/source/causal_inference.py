@@ -189,13 +189,7 @@ class causal_analyzer:
 
             self.rep_index = row_diff[:,:1][:self.rep_n,:]
             print("repair index: {}".format(self.rep_index.T))
-            '''
-            #self.rep_index = [20, 49., 30., 46., 34.]
-            #self.rep_index = (np.random.rand(self.rep_n) * 50).astype(int)
-            for n in range (0, self.rep_n):
-                self.rep_index.append(n)
-            print("repair index: {}".format(self.rep_index))
-            '''
+
             self.repair()
             rep_t = time.time() - rep_t
 
@@ -285,15 +279,7 @@ class causal_analyzer:
 
             self.rep_index = row_diff[:,:1][:self.rep_n,:]
             print("repair index: {}".format(self.rep_index.T))
-            #'''
-            #self.rep_index = [4,  0, 33, 35, 14]
 
-            #random1
-            #self.rep_index = (np.random.rand(self.rep_n) * 50)
-            #self.rep_index = (self.rep_index).astype(int)
-
-            #print("repair index: {}".format(self.rep_index))
-            #'''
             self.repair()
             rep_t = time.time() - rep_t
 
@@ -419,7 +405,7 @@ class causal_analyzer:
         optimizer = ps.single.GlobalBestPSO(n_particles=20, dimensions=self.rep_n, options=options,
                                             bounds=([[-10.0] * self.rep_n, [10.0] * self.rep_n]),
                                             init_pos=np.ones((20, self.rep_n), dtype=float), ftol=1e-3,
-                                            ftol_iter=5)
+                                            ftol_iter=10)
         #'''
 
         # Perform optimization

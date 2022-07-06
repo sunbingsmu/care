@@ -49,9 +49,9 @@ MINI_BATCH = DRAWNDOWN_SIZE // BATCH_SIZE
 ##############################
 #      END PARAMETERS        #
 ##############################
-#property 2
-#    "bounds": "[(0.6,0.6799), (-0.5,0.5), (-0.5,0.5), (0.45,0.5), (-0.5,-0.45)]",
-#y!0
+# property 2
+# "bounds": "[(0.6,0.6799), (-0.5,0.5), (-0.5,0.5), (0.45,0.5), (-0.5,-0.45)]",
+# please note that we use a strengthened version of property 2 where requir the min score is 0
 def __generate_x():
     x_0 = np.random.uniform(low=0.6, high=0.6799, size=(BATCH_SIZE, 1))
     x_1 = np.random.uniform(low=-0.5, high=0.5, size=(BATCH_SIZE, 1))
@@ -69,7 +69,7 @@ def property_satisfied(pre_y):
 
 def gen_data_set(model, data_path):
     """generate drawndown and counter example data set"""
-    # property 8
+    # property 2
     n_dd = 0
     n_cex = 0
     dd = []
@@ -113,10 +113,10 @@ def gen_data_set(model, data_path):
 
 def load_dataset(data_path):
 
-    with h5py.File(data_path + '/drawndown_new.h5', 'r') as hf:
+    with h5py.File(data_path + '/drawndown.h5', 'r') as hf:
         dd = hf['drawndown'][:]
 
-    with h5py.File(data_path + '/counterexample_new.h5', 'r') as hf:
+    with h5py.File(data_path + '/counterexample.h5', 'r') as hf:
         cex = hf['counterexample'][:]
 
     print('Dawndown shape %s' % str(dd.shape))
@@ -127,10 +127,10 @@ def load_dataset(data_path):
 
 def load_dataset_test(data_path):
 
-    with h5py.File(data_path + '/drawndown_test_new.h5', 'r') as hf:
+    with h5py.File(data_path + '/drawndown_test.h5', 'r') as hf:
         dd = hf['drawndown_test'][:]
 
-    with h5py.File(data_path + '/counterexample_test_new.h5', 'r') as hf:
+    with h5py.File(data_path + '/counterexample_test.h5', 'r') as hf:
         cex = hf['counterexample_test'][:]
 
     print('Dawndown shape %s' % str(dd.shape))
@@ -177,6 +177,8 @@ def start_analysis():
     dd_generator = build_data_loader(dd)
     cex_generator = build_data_loader(cex)
 
+    # use separate validation set
+    #dd_t, cex_t = load_dataset_test(DATA_DIR)
     dd_t, cex_t = load_dataset(DATA_DIR)
     dd_gen_test = build_data_loader(dd_t)
     cex_gen_test = build_data_loader(cex_t)
@@ -200,20 +202,15 @@ def start_analysis():
 
 
 def main():
-
     os.environ["CUDA_VISIBLE_DEVICES"] = DEVICE
     utils_backdoor.fix_gpu_memory()
-    for i in range (0, 5):
-        print(i)
-        start_analysis()
+    start_analysis()
 
     pass
 
 
 if __name__ == '__main__':
-    #sys.stdout = open('file', 'w')
     start_time = time.time()
     main()
     elapsed_time = time.time() - start_time
     print('elapsed time %s s' % elapsed_time)
-    #sys.stdout.close()

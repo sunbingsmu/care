@@ -92,8 +92,8 @@ class causal_analyzer:
 
         return (model1, model2)
 
-    def analyze(self, dd_gen, cex_gen):
-        alpha_list = [0.1, 0.2, 0.3,0.4,0.5,0.6,0.7,0.8,0.9]
+    def analyze_alpha(self, dd_gen, cex_gen):
+        alpha_list = [0.1,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
 
         for alpha in alpha_list:
             self.alpha = alpha
@@ -102,9 +102,10 @@ class causal_analyzer:
                 print('iteration: {}'.format(i))
                 self.analyze_each(dd_gen, cex_gen)
 
-    def analyze_each(self, dd_gen, cex_gen):
-        #'''
+    def analyze(self, dd_gen, cex_gen):
+
         ana_start_t = time.time()
+        #'''
         # find hidden range
         for step in range(self.steps):
             min = []
@@ -214,14 +215,7 @@ class causal_analyzer:
 
             #self.rep_index = row_diff[:,:1][:self.rep_n,:]
             print("repair index: {}".format(self.rep_index.T))
-            '''
-            #self.rep_index = [4,  0, 33, 35, 14]
-            #self.rep_index = (np.random.rand(self.rep_n) * 50).astype(int)
-            for n in range (0, 50):
-                self.rep_index.append(n)
 
-            print("repair index: {}".format(self.rep_index))
-            '''
             self.repair()
             rep_t = time.time() - rep_t
 
@@ -471,7 +465,7 @@ class causal_analyzer:
         optimizer = ps.single.GlobalBestPSO(n_particles=20, dimensions=self.rep_n, options=options,
                                             bounds=([[-10.0] * self.rep_n, [10.0] * self.rep_n]),
                                             init_pos=np.ones((20, self.rep_n), dtype=float), ftol=1e-3,
-                                            ftol_iter=5)
+                                            ftol_iter=10)
         #'''
 
         # Perform optimization

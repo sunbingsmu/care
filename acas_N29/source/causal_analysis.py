@@ -167,7 +167,9 @@ def start_analysis():
     dd_generator = build_data_loader(dd)
     cex_generator = build_data_loader(cex)
 
-    dd_t, cex_t = load_dataset_test(DATA_DIR)
+    # use separate validation set
+    #dd_t, cex_t = load_dataset_test(DATA_DIR)
+    dd_t, cex_t = load_dataset(DATA_DIR)
     dd_gen_test = build_data_loader(dd_t)
     cex_gen_test = build_data_loader(cex_t)
 
@@ -193,17 +195,13 @@ def main():
 
     os.environ["CUDA_VISIBLE_DEVICES"] = DEVICE
     utils_backdoor.fix_gpu_memory()
-    for i in range (0, 5):
-        print(i)
-        start_analysis()
+    start_analysis()
 
     pass
 
 
 if __name__ == '__main__':
-    #sys.stdout = open('file', 'w')
     start_time = time.time()
     main()
     elapsed_time = time.time() - start_time
     print('elapsed time %s s' % elapsed_time)
-    #sys.stdout.close()

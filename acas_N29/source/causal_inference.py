@@ -53,7 +53,7 @@ class causal_analyzer:
     TMP_DIR = 'tmp'
 
     SPLIT_LAYER = 6
-    REP_N = 5
+    REP_N = 27
 
     def __init__(self, model, dd_generator, cex_generator, dd_gen_test, cex_gen_test, input_shape,
                  mini_batch, batch_size=BATCH_SIZE, verbose=VERBOSE,
@@ -98,7 +98,7 @@ class causal_analyzer:
         for alpha in alpha_list:
             self.alpha = alpha
             print('alpha: {}'.format(alpha))
-            for i in range(0, 3):
+            for i in range(0, 5):
                 print('iteration: {}'.format(i))
                 self.analyze_each(dd_gen, cex_gen)
 
@@ -214,9 +214,7 @@ class causal_analyzer:
 
             #self.rep_index = row_diff[:,:1][:self.rep_n,:]
             print("repair index: {}".format(self.rep_index.T))
-            '''
-            self.rep_index = [4,  0, 33, 35, 14]
-            '''
+
             self.repair()
             rep_t = time.time() - rep_t
 
@@ -324,15 +322,7 @@ class causal_analyzer:
 
             #self.rep_index = row_diff[:,:1][:self.rep_n,:]
             print("repair index: {}".format(self.rep_index.T))
-            #'''
-            #self.rep_index = [4,  0, 33, 35, 14]delta = this_ie_i - last_ie_i
 
-            #random1
-            #self.rep_index = (np.random.rand(self.rep_n) * 50)
-            #self.rep_index = (self.rep_index).astype(int)
-
-            #print("repair index: {}".format(self.rep_index))
-            #'''
             self.repair()
             rep_t = time.time() - rep_t
 
@@ -466,7 +456,7 @@ class causal_analyzer:
         optimizer = ps.single.GlobalBestPSO(n_particles=20, dimensions=self.rep_n, options=options,
                                             bounds=([[-10.0] * self.rep_n, [10.0] * self.rep_n]),
                                             init_pos=np.ones((20, self.rep_n), dtype=float), ftol=1e-3,
-                                            ftol_iter=5)
+                                            ftol_iter=10)
         #'''
 
         # Perform optimization
