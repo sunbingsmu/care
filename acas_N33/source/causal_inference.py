@@ -52,8 +52,8 @@ class causal_analyzer:
     # dir to save intermediate masks
     TMP_DIR = 'tmp'
 
-    SPLIT_LAYER = 6
-    REP_N = 5
+    SPLIT_LAYER = 5
+    REP_N = 27
 
     def __init__(self, model, dd_generator, cex_generator, dd_gen_test, cex_gen_test, input_shape,
                  mini_batch, batch_size=BATCH_SIZE, verbose=VERBOSE,
@@ -487,10 +487,10 @@ class causal_analyzer:
             p_prediction = np.argmin(p_prediction, axis=1)
             o_prediction = np.argmin(o_prediction, axis=1)
 
-            attack_success = np.sum(p_prediction == 0 * np.ones(p_prediction.shape))
+            attack_success = np.sum(p_prediction != 0 * np.ones(p_prediction.shape))
             result = result + attack_success
 
-            o_correct = len(o_prediction) - np.sum(o_prediction == 0 * np.ones(o_prediction.shape))
+            o_correct = len(o_prediction) - np.sum(o_prediction != 0 * np.ones(o_prediction.shape))
 
             correct = correct + o_correct
             tot_count = tot_count + len(o_prediction)
@@ -533,9 +533,9 @@ class causal_analyzer:
                 p_prediction = np.argmin(p_prediction, axis=1)
                 o_prediction = np.argmin(o_prediction, axis=1)
 
-                attack_success = np.sum(p_prediction == 0 * np.ones(p_prediction.shape))
+                attack_success = np.sum(p_prediction != 0 * np.ones(p_prediction.shape))
                 result = result + attack_success
-                o_correct = len(o_prediction) - np.sum(o_prediction == 0 * np.ones(o_prediction.shape))
+                o_correct = len(o_prediction) - np.sum(o_prediction != 0 * np.ones(o_prediction.shape))
                 correct = correct + o_correct
                 tot_count = tot_count + len(o_prediction)
 
@@ -550,11 +550,11 @@ class causal_analyzer:
                 o_prediction = np.argmin(self.model.predict(X_batch), axis=1)
                 p_prediction = np.argmin(self.model.predict(X_batch_perturbed), axis=1)
 
-                attack_success = np.sum(p_prediction == 0 * np.ones(p_prediction.shape))
+                attack_success = np.sum(p_prediction != 0 * np.ones(p_prediction.shape))
                 result = result + attack_success
-                o_correct = len(o_prediction) - np.sum(o_prediction == 0 * np.ones(o_prediction.shape))
+                o_correct = len(o_prediction) - np.sum(o_prediction != 0 * np.ones(o_prediction.shape))
                 correct = correct + o_correct
                 tot_count = tot_count + len(o_prediction)
-            result = result / tot_count
-            correct = correct / tot_count
+            result = result / tot_count # cex VR
+            correct = correct / tot_count   # dd VR
         return result, correct

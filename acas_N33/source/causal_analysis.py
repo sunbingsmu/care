@@ -63,7 +63,7 @@ def __generate_x():
 
 def property_satisfied(pre_y):
     #pre_y = np.argmin(y, axis=1)
-    if pre_y != 0:
+    if pre_y == 0:
         return True
     return False
 
@@ -84,8 +84,6 @@ def gen_data_set(model, data_path):
         pre_y =  np.argmin(y, axis=1)
 
         for i in range (0, BATCH_SIZE):
-            print('n_dd:{}'.format(n_dd))
-            print('n_cex:{}'.format(n_cex))
             if (property_satisfied(pre_y[i])):
                 if n_dd < DRAWNDOWN_SIZE:
                     dd.append(x[i])
@@ -94,15 +92,16 @@ def gen_data_set(model, data_path):
                 if n_cex < COUNTEREG_SIZE:
                     cex.append(x[i])
                     n_cex = n_cex + 1
+                    print('n_cex:{}'.format(n_cex))
 
         if n_dd >= DRAWNDOWN_SIZE and dd_saved == 0:
             dd_saved = 1
-            with h5py.File(data_path + '/drawndown.h5', 'w') as f:
+            with h5py.File(data_path + '/drawndown_new.h5', 'w') as f:
                 f.create_dataset("drawndown", data=np.array(dd))
 
         if n_cex >= COUNTEREG_SIZE and cex_saved == 0:
             cex_saved = 1
-            with h5py.File(data_path + '/counterexample.h5', 'w') as f:
+            with h5py.File(data_path + '/counterexample_new.h5', 'w') as f:
                 f.create_dataset("counterexample", data=np.array(cex))
 
         if dd_saved == 1 and cex_saved == 1:
@@ -114,10 +113,10 @@ def gen_data_set(model, data_path):
 
 def load_dataset(data_path):
 
-    with h5py.File(data_path + '/drawndown_' + PROPERTY + '.h5', 'r') as hf:
+    with h5py.File(data_path + '/drawndown_new.h5', 'r') as hf:
         dd = hf['drawndown'][:]
 
-    with h5py.File(data_path + '/counterexample_' + PROPERTY +'.h5', 'r') as hf:
+    with h5py.File(data_path + '/counterexample_new.h5', 'r') as hf:
         cex = hf['counterexample'][:]
 
     print('Dawndown shape %s' % str(dd.shape))
@@ -128,10 +127,10 @@ def load_dataset(data_path):
 
 def load_dataset_test(data_path):
 
-    with h5py.File(data_path + '/drawndown_test.h5', 'r') as hf:
+    with h5py.File(data_path + '/drawndown_test_new.h5', 'r') as hf:
         dd = hf['drawndown_test'][:]
 
-    with h5py.File(data_path + '/counterexample_test.h5', 'r') as hf:
+    with h5py.File(data_path + '/counterexample_test_new.h5', 'r') as hf:
         cex = hf['counterexample_test'][:]
 
     print('Dawndown shape %s' % str(dd.shape))
@@ -178,7 +177,7 @@ def start_analysis():
     dd_generator = build_data_loader(dd)
     cex_generator = build_data_loader(cex)
 
-    dd_t, cex_t = load_dataset_test(DATA_DIR)
+    dd_t, cex_t = load_dataset(DATA_DIR)
     dd_gen_test = build_data_loader(dd_t)
     cex_gen_test = build_data_loader(cex_t)
 
