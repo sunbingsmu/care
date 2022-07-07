@@ -6,7 +6,7 @@ For fairness improvement task, please refer to https://github.com/longph1989/Soc
 For backdoor removal and safety improvement task, please run below script in each module:
 - causal_analysis.py 
 
-Benchmark is available at [benchmark](https://doi.org/10.6084/m9.figshare.20012717).
+Benchmark is available at [benchmark](10.6084/m9.figshare.20250816).
 
 We are migrating this implementation to Socrates and this is a temparary repo for now.
 
