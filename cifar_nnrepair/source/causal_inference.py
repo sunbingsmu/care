@@ -102,8 +102,8 @@ class causal_analyzer:
 
     REP_N          = 5
 
-    def __init__(self, model, generator, input_shape,
-                 init_cost, steps, mini_batch, lr, num_classes,
+    def __init__(self, model, generator, pso_gen, input_shape,
+                 init_cost, steps, mini_batch, pso_batch, lr, num_classes,
                  upsample_size=UPSAMPLE_SIZE,
                  patience=PATIENCE, cost_multiplier=COST_MULTIPLIER,
                  reset_cost_to_zero=RESET_COST_TO_ZERO,
@@ -123,9 +123,11 @@ class causal_analyzer:
         self.model = model
         self.input_shape = input_shape
         self.gen = generator
+        self.pso_gen = pso_gen
         self.init_cost = init_cost
         self.steps = 1  #steps
         self.mini_batch = mini_batch
+        self.pso_batch = pso_batch
         self.lr = lr
         self.num_classes = num_classes
         self.upsample_size = upsample_size
@@ -204,7 +206,7 @@ class causal_analyzer:
         x_out = np.add(filtered, fusion)
 
         #test
-        #'''
+        '''
         utils_backdoor.dump_image(x[0]* 255,
                                   '../results/ori_img0.png',
                                   'png')
@@ -220,7 +222,7 @@ class causal_analyzer:
         fusion = np.multiply(pattern, np.expand_dims(mask, axis=2))
 
         utils_backdoor.dump_image(fusion, '../results/fusion_test.png', 'png')
-        #'''
+        '''
         return x_out
 
     def injection_func(self, mask, pattern, adv_img):
@@ -285,7 +287,7 @@ class causal_analyzer:
 
         pass
 
-    def analyze(self, gen):
+    def analyze(self):
         #'''
         print('layer: {}'.format(self.SPLIT_LAYER))
         ana_start_t = time.time()
@@ -295,12 +297,9 @@ class causal_analyzer:
             min_p = []
             max = []
             max_p = []
-            #self.mini_batch = 2
-            for idx in range(self.mini_batch):
-                X_batch, Y_batch = gen.next()
-                #label = np.argmax(Y_batch, axis=1)
-                #ori_predict = self.model.predict(X_batch)
-                #p_label = np.argmax(ori_predict, axis=1)
+
+            for idx in range(self.pso_batch):
+                X_batch, Y_batch = self.pso_gen.next()
                 X_batch_perturbed = self.get_perturbed_input(X_batch)
                 min_i, max_i = self.get_h_range(X_batch)
                 min.append(min_i)
@@ -330,9 +329,9 @@ class causal_analyzer:
         for step in range(self.steps):
             #'''
             ie_batch = []
-            #self.mini_batch = 2
-            for idx in range(self.mini_batch):
-                X_batch, _ = gen.next()
+
+            for idx in range(self.pso_batch):
+                X_batch, _ = self.pso_gen.next()
 
                 #X_batch_perturbed = self.get_perturbed_input(X_batch)
 
@@ -390,8 +389,8 @@ class causal_analyzer:
 
     pass
 
-    def analyze_gradient(self, gen):
-        #'''
+    def analyze_gradient(self):
+        # '''
         ana_start_t = time.time()
         # find hidden range
         for step in range(self.steps):
@@ -399,9 +398,9 @@ class causal_analyzer:
             min_p = []
             max = []
             max_p = []
-            #self.mini_batch = 2
-            for idx in range(self.mini_batch):
-                X_batch, Y_batch = gen.next()
+
+            for idx in range(self.pso_batch):
+                X_batch, Y_batch = self.pso_gen.next()
                 X_batch_perturbed = self.get_perturbed_input(X_batch)
                 min_i, max_i = self.get_h_range(X_batch)
                 min.append(min_i)
@@ -431,9 +430,9 @@ class causal_analyzer:
         for step in range(self.steps):
             #'''
             ie_batch = []
-            #self.mini_batch = 2
-            for idx in range(self.mini_batch):
-                X_batch, _ = gen.next()
+
+            for idx in range(self.pso_batch):
+                X_batch, _ = self.pso_gen.next()
 
                 #X_batch_perturbed = self.get_perturbed_input(X_batch)
 
@@ -689,8 +688,8 @@ class causal_analyzer:
         tot_count = 0
         correct = 0
         # per particle
-        for idx in range(self.mini_batch):
-            X_batch, Y_batch = self.gen.next()
+        for idx in range(self.pso_batch):
+            X_batch, Y_batch = self.pso_gen.next()
             X_batch_perturbed = self.get_perturbed_input(X_batch)
 
             p_prediction = self.model1.predict(X_batch_perturbed)

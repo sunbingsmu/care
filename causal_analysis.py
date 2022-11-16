@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# @Date    : 2018-11-05 11:30:01
-# @Author  : Bolun Wang (bolunwang@cs.ucsb.edu)
-# @Link    : http://cs.ucsb.edu/~bolunwang
-
 import os
 import time
 
@@ -32,7 +26,7 @@ import sys
 DEVICE = '3'  # specify which GPU to use
 
 DATA_DIR = 'data'  # data folder
-DATA_FILE = 'gtsrb_dataset_int.h5'  # dataset file
+DATA_FILE = 'gtsrb_dataset.h5'  # dataset file
 MODEL_DIR = 'models'  # model directory
 MODEL_FILENAME = 'gtsrb_bottom_right_white_4_target_33.h5'  # model file
 #MODEL_FILENAME = 'trojaned_face_model_wm.h5'
@@ -54,9 +48,10 @@ INTENSITY_RANGE = 'raw'  # preprocessing method for the task, GTSRB uses raw pix
 # parameters for optimization
 BATCH_SIZE = 32  # batch size used for optimization
 LR = 0.1  # learning rate
-STEPS = 1000  # total optimization iterations
+STEPS = 1
 NB_SAMPLE = 1000  # number of samples in each mini batch
 MINI_BATCH = NB_SAMPLE // BATCH_SIZE  # mini batch size used for early stop
+PSO_BATCH = 1000 // BATCH_SIZE
 INIT_COST = 1e-3  # initial weight used for balancing two objectives
 
 REGULARIZATION = 'l1'  # reg term to control the mask's norm
@@ -105,6 +100,26 @@ def load_dataset(data_file=('%s/%s' % (DATA_DIR, DATA_FILE))):
 
     return X_test, Y_test
 
+def load_dataset_pso(data_file=('%s/%s' % (DATA_DIR, DATA_FILE))):
+
+    dataset = utils_backdoor.load_dataset(data_file, keys=['X_train', 'Y_train', 'X_test', 'Y_test'])
+
+    X_train = np.array(dataset['X_train'], dtype='float32')
+    Y_train = np.array(dataset['Y_train'], dtype='float32')
+
+    # randomize the sample
+    x_out = np.array(X_train)
+    y_out = np.array(Y_train)
+    idx = np.arange(len(x_out))
+    np.random.shuffle(idx)
+    #print(idx)
+    x_out = x_out[idx, :][0:1000]
+    y_out = y_out[idx, :][0:1000]
+
+    print('x_train shape %s' % str(x_out.shape))
+    print('y_train shape %s' % str(y_out.shape))
+
+    return x_out, y_out
 
 def build_data_loader(X, Y):
 
@@ -115,12 +130,12 @@ def build_data_loader(X, Y):
     return generator
 
 
-def trigger_analyzer(analyzer, gen):
+def trigger_analyzer(analyzer):
 
     visualize_start_time = time.time()
 
     # execute reverse engineering
-    analyzer.analyze(gen)
+    analyzer.analyze()
 
     visualize_end_time = time.time()
     print('visualization cost %f seconds' %
@@ -159,8 +174,10 @@ def start_analysis():
 
     print('loading dataset')
     X_test, Y_test = load_dataset()
+    x_pso, y_pso = load_dataset_pso()
     # transform numpy arrays into data generator
     test_generator = build_data_loader(X_test, Y_test)
+    pso_generator = build_data_loader(x_pso, y_pso)
 
     print('loading model')
     model_file = '%s/%s' % (MODEL_DIR, MODEL_FILENAME)
@@ -170,9 +187,11 @@ def start_analysis():
     analyzer = causal_analyzer(
         model,
         test_generator,
+        pso_generator,
         input_shape=INPUT_SHAPE,
         init_cost=INIT_COST, steps=STEPS, lr=LR, num_classes=NUM_CLASSES,
         mini_batch=MINI_BATCH,
+        pso_batch=PSO_BATCH,
         upsample_size=UPSAMPLE_SIZE,
         patience=PATIENCE, cost_multiplier=COST_MULTIPLIER,
         img_color=IMG_COLOR, batch_size=BATCH_SIZE, verbose=2,
@@ -180,18 +199,8 @@ def start_analysis():
         early_stop=EARLY_STOP, early_stop_threshold=EARLY_STOP_THRESHOLD,
         early_stop_patience=EARLY_STOP_PATIENCE)
 
-    # y_label list to analyze
-    y_target_list = list(range(NUM_CLASSES))
-    y_target_list.remove(Y_TARGET)
-    y_target_list = [Y_TARGET] + y_target_list
-
-    y_target_list = [33]
-    for y_target in y_target_list:
-
-        #print('processing label %d' % y_target)
-
-        trigger_analyzer(
-            analyzer, test_generator)
+    trigger_analyzer(
+        analyzer)
     pass
 
 
@@ -199,9 +208,8 @@ def main():
 
     os.environ["CUDA_VISIBLE_DEVICES"] = DEVICE
     utils_backdoor.fix_gpu_memory()
-    for i in range (0, 3):
-        print(i)
-        start_analysis()
+
+    start_analysis()
 
     pass
 

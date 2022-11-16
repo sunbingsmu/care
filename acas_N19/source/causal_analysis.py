@@ -180,8 +180,8 @@ def start_analysis():
     cex_generator = build_data_loader(cex)
 
     # use separate validatoin set
-    #dd_t, cex_t = load_dataset_test(DATA_DIR)
-    dd_t, cex_t = load_dataset(DATA_DIR)
+    dd_t, cex_t = load_dataset_test(DATA_DIR)
+    #dd_t, cex_t = load_dataset(DATA_DIR)
     dd_gen_test = build_data_loader(dd_t)
     cex_gen_test = build_data_loader(cex_t)
 

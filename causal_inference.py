@@ -102,8 +102,8 @@ class causal_analyzer:
 
     REP_N          = 5
 
-    def __init__(self, model, generator, input_shape,
-                 init_cost, steps, mini_batch, lr, num_classes,
+    def __init__(self, model, generator, pso_gen, input_shape,
+                 init_cost, steps, mini_batch, pso_batch, lr, num_classes,
                  upsample_size=UPSAMPLE_SIZE,
                  patience=PATIENCE, cost_multiplier=COST_MULTIPLIER,
                  reset_cost_to_zero=RESET_COST_TO_ZERO,
@@ -123,9 +123,11 @@ class causal_analyzer:
         self.model = model
         self.input_shape = input_shape
         self.gen = generator
+        self.pso_gen = pso_gen
         self.init_cost = init_cost
         self.steps = 1  #steps
         self.mini_batch = mini_batch
+        self.pso_batch = pso_batch
         self.lr = lr
         self.num_classes = num_classes
         self.upsample_size = upsample_size
@@ -295,7 +297,7 @@ class causal_analyzer:
 
         pass
 
-    def analyze(self, gen):
+    def analyze(self):
         #'''
         ana_start_t = time.time()
         # find hidden range
@@ -304,9 +306,9 @@ class causal_analyzer:
             min_p = []
             max = []
             max_p = []
-            #self.mini_batch = 2
-            for idx in range(self.mini_batch):
-                X_batch, Y_batch = gen.next()
+
+            for idx in range(self.pso_batch):
+                X_batch, Y_batch = self.pso_gen.next()
                 X_batch_perturbed = self.get_perturbed_input(X_batch)
                 min_i, max_i = self.get_h_range(X_batch)
                 min.append(min_i)
@@ -333,9 +335,9 @@ class causal_analyzer:
         for step in range(self.steps):
             #'''
             ie_batch = []
-            #self.mini_batch = 2
-            for idx in range(self.mini_batch):
-                X_batch, _ = gen.next()
+
+            for idx in range(self.pso_batch):
+                X_batch, _ = self.pso_gen.next()
 
                 #X_batch_perturbed = self.get_perturbed_input(X_batch)
 
@@ -389,7 +391,7 @@ class causal_analyzer:
 
     pass
 
-    def analyze_gradient(self, gen):
+    def analyze_gradient(self):
         # '''
         ana_start_t = time.time()
         # find hidden range
@@ -398,9 +400,9 @@ class causal_analyzer:
             min_p = []
             max = []
             max_p = []
-            # self.mini_batch = 2
-            for idx in range(self.mini_batch):
-                X_batch, Y_batch = gen.next()
+
+            for idx in range(self.pso_batch):
+                X_batch, Y_batch = self.pso_gen.next()
                 X_batch_perturbed = self.get_perturbed_input(X_batch)
                 min_i, max_i = self.get_h_range(X_batch)
                 min.append(min_i)
@@ -427,9 +429,9 @@ class causal_analyzer:
         for step in range(self.steps):
             # '''
             ie_batch = []
-            #self.mini_batch = 2
-            for idx in range(self.mini_batch):
-                X_batch, _ = gen.next()
+
+            for idx in range(self.pso_batch):
+                X_batch, _ = self.pso_gen.next()
 
                 # X_batch_perturbed = self.get_perturbed_input(X_batch)
 
@@ -651,8 +653,8 @@ class causal_analyzer:
         result = 0.0
         tot_count = 0
         # per particle
-        for idx in range(self.mini_batch):
-            X_batch, Y_batch = self.gen.next()
+        for idx in range(self.pso_batch):
+            X_batch, Y_batch = self.pso_gen.next()
             X_batch_perturbed = self.get_perturbed_input(X_batch)
 
             o_prediction = self.model1.predict(X_batch)
